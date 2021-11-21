@@ -1,0 +1,3 @@
+[submodule "examples/solidus-examples/lib/solidus"]
+	path = examples/solidus-examples/lib/solidus
+	url = https://github.com/solidusio/solidus.git

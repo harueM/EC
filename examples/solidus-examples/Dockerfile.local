@@ -1,0 +1,30 @@
+FROM ruby:2.6.6
+
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+  apt-get update -qq && \
+  apt-get install -y build-essential \
+  default-libmysqlclient-dev \
+  nodejs \
+  default-mysql-client \
+  xvfb \
+  redis-tools \
+  graphviz && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  lsof \
+  vim
+
+ENV APP_ROOT /app/solidus-examples
+RUN mkdir -p $APP_ROOT
+
+WORKDIR $APP_ROOT
+
+COPY Gemfile* $APP_ROOT/
+RUN gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
+RUN bundle install
+
+RUN npm install -g yarn
+COPY package.json yarn.lock /tmp/
+RUN cd /tmp && yarn install --check-files
+
+ADD . $APP_ROOT
+RUN cp -a /tmp/node_modules $APP_ROOT

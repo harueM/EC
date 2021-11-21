@@ -1,0 +1,51 @@
+version: "3.3"
+networks:
+  solidus-examples_network:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.10.0.0/16
+
+services:
+  app:
+    build:
+      context: ./solidus-examples/
+      dockerfile: Dockerfile.local
+    command: bash -c "rm -f tmp/pids/server.pid && bundle install && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - ./solidus-examples:/app/solidus-examples
+      - '/app/solidus-examples/node_modules'
+      - tmp-data:/opt/webapp/tmp
+      - log-data:/opt/webapp/log
+      - /Users/murakamiharue/Desktop/ec/solidus:/app/solidus-examples/lib/solidus
+    env_file: ./solidus-examples/containers/rails/.env
+    networks:
+      solidus-examples_network:
+        ipv4_address: 172.10.0.5
+    ports:
+      - "3001:3000"
+    depends_on:
+      - db
+    links:
+      - db
+    stdin_open: true
+    tty: true
+  db:
+    restart:
+      always
+    platform: linux/x86_64
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      solidus-examples_network:
+        ipv4_address: 172.10.0.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - 53306:3306
+volumes:
+  db-data:
+  tmp-data:
+  log-data:
