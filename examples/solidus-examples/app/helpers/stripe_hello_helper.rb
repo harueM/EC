@@ -1,0 +1,2 @@
+module StripeHelloHelper
+end
